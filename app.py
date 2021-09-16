@@ -1,12 +1,18 @@
+from ListaDoble import ListaDoble
+from ListaSimple import ListaSimple
+from Analizador import Analizador
 from tkinter.constants import LEFT, TOP, X
 from tkinter.font import BOLD
 import tkinter as tk
 from tkinter import Frame, ttk, filedialog
 import xml.etree.ElementTree as ET
-#from os import startfile, system
-#lineas = ListaSimple() 
+from os import startfile, system
 
 class interfaz():
+    lexico = Analizador()
+    lineas = ListaDoble() 
+    productos = ListaSimple()
+    trabajos = ListaSimple()
     def __init__(self):
         ventana = tk.Tk()
         fuente = 'Courier'
@@ -21,7 +27,7 @@ class interfaz():
         ventana.title('Digital Intelligence S. A. Simulator')   
         ventana.configure(bg = '#EAEAEA')    
         
-    def leer_archivo(self): #pedir True or False / 0 ó 1 para saber si es un archivo maquina o simulación --> command = lambda: leer_archivo("1")
+    def leer_archivo(self, estado):
         try:
             ruta = filedialog.askopenfilename(title = "Abrir un archivo")
             with open(ruta, 'rt', encoding = 'utf-8') as f:
@@ -29,38 +35,55 @@ class interfaz():
                 print('Archivo cargado con éxito')
                 tree = ET.parse(f)
                 root = tree.getroot()
+                if estado:
+                    self.analizar_maquina(root)
+                else:
+                    self.analizar_simulacion(root)
         except OSError:
             print("<<< No se pudo leer el Archivo", ruta ,'>>>')
             return
-        """    
-        contador = 0
-        for elem in root:      
-            nombre = elem.get('nombre') #nombre del terreno
-            dim_x = elem.findtext('dimension/m') #dimension x del terreno
-            dim_y = elem.findtext('dimension/n') #dimension y del terreno                  
-            inicio_x = elem.findtext('posicioninicio/x') #incio x 
-            inicio_y = elem.findtext('posicioninicio/y') #incio y 
-            final_x = elem.findtext('posicionfin/x') #fin x 
-            final_y = elem.findtext('posicionfin/y') #fin y         
-            #lineas.insertar_terrenos(contador,nombre,dim_x,dim_y,inicio_x,inicio_y,final_x,final_y)
-            contador += 1
         
-        contador_id = 1
-        contador_pos = -1
-        for node in root.iter('posicion'):        
-            posx = node.attrib.get('x')
-            posy = node.attrib.get('y')
-            valor = node.text
-            contador_id += 1
-            if int(posx) == 1 and int(posy) == 1:
-                contador_pos +=1
-                contador_id = 1
-            #posiciones.insertar(contador_pos, contador_id, posx, posy, valor, False)    """      
-     
+    def analizar_maquina(self, root):    
+        indice_elaboracion = 0
+        lineas_produccion = 0
+        for elem in root: #con la cantidadlineasprod se puede saber cuantas hay que meter y con un contador detenerse
+            #print(elem.tag, elem.attrib)  
+            if elem.tag == 'CantidadLineasProduccion':
+                lineas_produccion = elem.text
+                #print(lineas_produccion)
+            if elem.tag == 'ListadoLineasProduccion':
+                for node in root.iter('LineaProduccion'):
+                    numero = node.findtext('Numero')
+                    cantidad_componentes = node.findtext('CantidadComponentes')
+                    tiempo_ensamblaje = node.findtext('TiempoEnsamblaje')     
+                    self.lineas.insertar_linea(numero, cantidad_componentes, tiempo_ensamblaje, 0) 
+                    #print(numero, cantidad_componentes, tiempo_ensamblaje) 
+                    
+            if elem.tag == 'ListadoProductos':
+                for node in root.iter('Producto'):
+                    nombre = node.findtext('nombre')
+                    elaboracion = node.findtext('elaboracion')
+                    self.productos.insertar_producto(nombre, 0, 0, indice_elaboracion)
+                    self.lexico.analizador_estados(elaboracion, indice_elaboracion) 
+                    indice_elaboracion += 1
+        self.lexico.tamano()
+        #self.productos.imprimir_producto()
+    
+    def analizar_simulacion(self, root):    
+        indice_elaboracion = 0
+        for elem in root:
+            if elem.tag == 'Nombre':
+                nombre_simulacion = elem.text
+                print(nombre_simulacion)
+            if elem.tag == 'ListadoProductos':
+                for node in root.iter('Producto'):
+                    nombre_producto = node.text
+                    print(nombre_producto)
+                    
     def crear_toolbar(self, ventana, fuente):
         toolbar = Frame(ventana, bg = 'white')         
-        boton_archivo_maquina = tk.Button(toolbar, text = 'Archivo Máquina', width = 15, height = 1, font = (fuente, 10), command = self.leer_archivo )
-        boton_archivo_simulacion = tk.Button(toolbar, text = 'Archivo Simulación', width = 18, height = 1, font = (fuente, 10), command = self.leer_archivo )
+        boton_archivo_maquina = tk.Button(toolbar, text = 'Archivo Máquina', width = 15, height = 1, font = (fuente, 10), command = lambda: self.leer_archivo(True) )
+        boton_archivo_simulacion = tk.Button(toolbar, text = 'Archivo Simulación', width = 18, height = 1, font = (fuente, 10), command = lambda: self.leer_archivo(False) )
         boton_reporte = tk.Button(toolbar, text = 'Analizar', width = 9, height = 1, font = (fuente, 10))
         boton_ayuda = tk.Button(toolbar, text = 'Reportes', width = 9, height = 1, font = (fuente, 10))
         boton_archivo_maquina.pack(side = LEFT, padx=2, pady= 2)
