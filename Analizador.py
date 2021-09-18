@@ -7,18 +7,17 @@ class Analizador():
     lexema = ''
     estado = 0
     id = 0
-    tipos = Token("Lexema",-1,-1,-1)
+    tipos = Token("Lexema",-1,-1,-1,'')
     
-    def agregar_token(self, tipo, indice_elaboracion):
-        self.tokens.insertar_token(self.lexema, tipo, self.id, indice_elaboracion)
+    def agregar_token(self, tipo, indice_elaboracion, nombre_producto):
+        self.tokens.insertar_token(self.lexema, tipo, self.id, indice_elaboracion, nombre_producto)
         self.lexema = ''
         self.id += 1
     
-    def analizador_estados(self, entrada, indice_elaboracion):
+    def analizador_estados(self, entrada, indice_elaboracion, nombre_producto):
         self.estado = 0
         self.lexema = ''
         entrada += '¬'
-        #print(entrada)
         actual = ''
         longitud = len(entrada)
         for contador in range(longitud):
@@ -27,7 +26,7 @@ class Analizador():
                 if actual == 'L':
                     self.estado = 1
                     self.lexema += actual
-                    self.agregar_token(self.tipos.LETRA, indice_elaboracion)
+                    self.agregar_token(self.tipos.LETRA, indice_elaboracion, nombre_producto)
                 
             elif self.estado == 1:
                 if actual.isdigit():
@@ -39,18 +38,18 @@ class Analizador():
                     self.estado = 2
                     self.lexema += actual
                 else:
-                    self.agregar_token(self.tipos.DIGITO, indice_elaboracion) 
+                    self.agregar_token(self.tipos.DIGITO, indice_elaboracion, nombre_producto) 
                     
                 if actual == 'p': 
                     self.estado = 3
                     self.lexema += actual  
-                    self.agregar_token(self.tipos.SEPARADOR, indice_elaboracion)  
+                    self.agregar_token(self.tipos.SEPARADOR, indice_elaboracion, nombre_producto)  
                       
             elif self.estado == 3:         
                 if actual == 'C': 
                     self.estado = 4
                     self.lexema += actual 
-                    self.agregar_token(self.tipos.LETRA,indice_elaboracion)                
+                    self.agregar_token(self.tipos.LETRA,indice_elaboracion, nombre_producto)                
                     
             elif self.estado == 4: 
                 if actual.isdigit():
@@ -62,13 +61,14 @@ class Analizador():
                     self.estado = 5
                     self.lexema += actual
                 else:
-                    self.agregar_token(self.tipos.DIGITO, indice_elaboracion)     
+                    self.agregar_token(self.tipos.DIGITO, indice_elaboracion, nombre_producto)     
                 if actual == ' ':
-                    self.agregar_token(self.tipos.ESPACIO, indice_elaboracion)
+                    self.agregar_token(self.tipos.ESPACIO, indice_elaboracion, nombre_producto)
                     self.estado = 0  
-    def tamano(self):
+    def tamano(self, lineas):
         #self.tokens.imprimir_tokens()
-        self.tokens.guardar_trabajo()   
-        self.tokens.imprimir_trabajo()           
-                    
-              
+        self.tokens.guardar_trabajo()  
+        self.tokens.colocar_tiempo(lineas)  
+        #self.tokens.imprimir_trabajo() 
+        self.tokens.llenar_matriz()
+          

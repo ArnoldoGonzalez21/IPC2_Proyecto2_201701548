@@ -6,11 +6,12 @@ class Token():
     SEPARADOR = 3
     ESPACIO = 4
     
-    def __init__(self, lexema, tipo, id, indice_elaboracion):
+    def __init__(self, lexema, tipo, id, indice_elaboracion, nombre_producto):
         self.lexema_valido = lexema
         self.tipo = tipo
         self.id = id
         self.indice_elaboracion = indice_elaboracion
+        self.nombre_producto = nombre_producto
         self.siguiente = None
     
     def get_tipo(self):
@@ -30,4 +31,7 @@ class Token():
         return self.id
     
     def get_indice_elaboracion(self):
-        return self.indice_elaboracion   
+        return self.indice_elaboracion 
+    
+    def get_nombre_producto(self):
+        return self.nombre_producto

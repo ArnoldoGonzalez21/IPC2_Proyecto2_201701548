@@ -5,5 +5,4 @@ class Linea():
         self.tiempo_ensamblaje = tiempo_ensamblaje
         self.estado = estado 
         self.siguiente = None
-        self.anterior = None
-            
+        self.anterior = None 

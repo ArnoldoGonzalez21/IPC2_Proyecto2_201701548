@@ -1,6 +1,7 @@
 from ListaDoble import ListaDoble
 from ListaSimple import ListaSimple
 from Analizador import Analizador
+from Simulacion import Simulacion
 from tkinter.constants import LEFT, TOP, X
 from tkinter.font import BOLD
 import tkinter as tk
@@ -12,7 +13,7 @@ class interfaz():
     lexico = Analizador()
     lineas = ListaDoble() 
     productos = ListaSimple()
-    trabajos = ListaSimple()
+    simulaciones = ListaSimple()
     def __init__(self):
         ventana = tk.Tk()
         fuente = 'Courier'
@@ -53,32 +54,31 @@ class interfaz():
                 #print(lineas_produccion)
             if elem.tag == 'ListadoLineasProduccion':
                 for node in root.iter('LineaProduccion'):
-                    numero = node.findtext('Numero')
-                    cantidad_componentes = node.findtext('CantidadComponentes')
-                    tiempo_ensamblaje = node.findtext('TiempoEnsamblaje')     
+                    numero = node.findtext('Numero').replace("\n","").replace("\t","")
+                    cantidad_componentes = node.findtext('CantidadComponentes').replace("\n","").replace("\t","")
+                    tiempo_ensamblaje = node.findtext('TiempoEnsamblaje').replace("\n","").replace("\t","")
                     self.lineas.insertar_linea(numero, cantidad_componentes, tiempo_ensamblaje, 0) 
-                    #print(numero, cantidad_componentes, tiempo_ensamblaje) 
                     
             if elem.tag == 'ListadoProductos':
                 for node in root.iter('Producto'):
-                    nombre = node.findtext('nombre')
+                    nombre = node.findtext('nombre').replace("\n","").replace("\t","")
                     elaboracion = node.findtext('elaboracion')
                     self.productos.insertar_producto(nombre, 0, 0, indice_elaboracion)
-                    self.lexico.analizador_estados(elaboracion, indice_elaboracion) 
+                    self.lexico.analizador_estados(elaboracion, indice_elaboracion, nombre) 
                     indice_elaboracion += 1
-        self.lexico.tamano()
+        #self.lineas.imprimir_linea()       
+        self.lexico.tamano(self.lineas)
         #self.productos.imprimir_producto()
     
-    def analizar_simulacion(self, root):    
-        indice_elaboracion = 0
+    def analizar_simulacion(self, root):  
         for elem in root:
             if elem.tag == 'Nombre':
                 nombre_simulacion = elem.text
-                print(nombre_simulacion)
             if elem.tag == 'ListadoProductos':
                 for node in root.iter('Producto'):
                     nombre_producto = node.text
-                    print(nombre_producto)
+                    self.simulaciones.insertar_simulacion(nombre_simulacion, nombre_producto)
+        self.simulaciones.imprimir_simulacion()
                     
     def crear_toolbar(self, ventana, fuente):
         toolbar = Frame(ventana, bg = 'white')         
