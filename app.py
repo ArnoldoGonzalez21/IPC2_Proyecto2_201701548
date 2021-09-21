@@ -69,16 +69,18 @@ class interfaz():
         #self.lineas.imprimir_linea()       
         self.lexico.tamano(self.lineas)
     
-    def analizar_simulacion(self, root):  
+    def analizar_simulacion(self, root):
+        cantidad_productos_simular = 0  
         for elem in root:
             if elem.tag == 'Nombre':
                 nombre_simulacion = elem.text.replace("\n","").replace("\t","")
             if elem.tag == 'ListadoProductos':
                 for node in root.iter('Producto'):
+                    cantidad_productos_simular += 1
+                for node in root.iter('Producto'):
                     nombre_producto = node.text.replace("\n","").replace("\t","").strip()
-                    self.simulaciones.insertar_simulacion(nombre_simulacion, nombre_producto)
+                    self.simulaciones.insertar_simulacion(nombre_simulacion, nombre_producto, cantidad_productos_simular)    
         #self.simulaciones.imprimir_simulacion()
-        self.productos.guardar_numero_componentes_producto(self.lexico.get_tokens())
         self.simulaciones.guardar_numero_componentes_simulacion(self.lexico.get_tokens())
         self.simulaciones.recorrer_simulacion(self.lexico.get_tokens())
         self.simulaciones.imprimir_simulacion()

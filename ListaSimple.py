@@ -5,6 +5,7 @@ from Simulacion import Simulacion
 from MatrizDispersa import MatrizDispersa
 
 primer_componente = True
+termino = False
 
 class ListaSimple():
     matriz = MatrizDispersa(0)
@@ -51,7 +52,7 @@ class ListaSimple():
             tmp.siguiente = nuevo
     
     def insertar_elaboracion(self, numero_linea, numero_componente, tiempo, indice_producto, nombre_producto):
-        nuevo = Trabajo(numero_linea, numero_componente, tiempo, indice_producto, nombre_producto, 0, 0)
+        nuevo = Trabajo(numero_linea, numero_componente, tiempo, indice_producto, nombre_producto, 0, 1, 0)
         self.size_elaboracion += 1
         if self.inicio_elaboracion is None:
             self.inicio_elaboracion = nuevo
@@ -64,8 +65,8 @@ class ListaSimple():
             nuevo.anterior = tmp
             self.final_elaboracion = nuevo               
     
-    def insertar_simulacion(self, nombre_simulacion, nombre_producto):
-        nuevo = Simulacion(nombre_simulacion, nombre_producto, 0)
+    def insertar_simulacion(self, nombre_simulacion, nombre_producto, cantidad_productos_simular):
+        nuevo = Simulacion(nombre_simulacion, nombre_producto, 0, 0, cantidad_productos_simular, False)
         self.size_simulacion += 1
         if self.inicio_simulacion is None:
             self.inicio_simulacion = nuevo
@@ -84,7 +85,6 @@ class ListaSimple():
         while actual is not None:
             tmp = actual.siguiente
             if tmp is None:
-                #self.insertar_elaboracion(numero_linea, numero_componente, indice_elaboracion)
                 break
             if actual.get_lexema() == 'L':
                 numero_linea = tmp.get_lexema()
@@ -107,52 +107,53 @@ class ListaSimple():
             self.matriz.insert(pos_x, pos_y, tiempo)
             actual = actual.siguiente
         #self.matriz.sizep() 
-        #self.matriz.generarGraphviz(True) 
+        self.matriz.generarGraphviz(True) 
         
     def recorrer_tiempo_elaboracion(self, nombre_producto):
-        global primer_componente
         actual = self.inicio_elaboracion
         while actual is not None:
-            if nombre_producto == actual.get_nombre_producto() and actual.get_tiempo_total() == 0:
-                tmp = actual.anterior
-                regresar_componente : int = 0
-                componente : int = 0 
-                tiempo_tirada : int = 0
-                if tmp is not None and tmp.get_nombre_producto() == nombre_producto:
-                    regresar_componente = int(tmp.get_numero_componente()) - int(actual.get_numero_componente())
-                    regresar_componente = abs(regresar_componente)
-                if primer_componente:
-                    componente : int = actual.get_numero_componente()
-                tiempo : int = actual.get_tiempo()
-                tiempo_tirada = int(componente) + int(tiempo) + int(regresar_componente)
-                nuevo_tiempo = int(actual.get_tiempo_total()) + int(tiempo_tirada)
-                actual.set_tiempo_total(nuevo_tiempo)
-                return
-            actual = actual.siguiente
-    
+            tmp = actual.siguiente
+            if nombre_producto == actual.get_nombre_producto():
+                if int(actual.get_numero_componente()) == int(actual.get_contador_posicion()) and int(actual.get_estado()) != 2:
+                    
+                    actual.set_estado(2) 
+                    nuevo_tiempo = int(actual.get_tiempo_total()) + int(actual.get_tiempo()) 
+                    actual.set_tiempo_total(nuevo_tiempo)
+                    if tmp is not None and tmp.get_nombre_producto() == nombre_producto:
+                        cont_act = actual.get_numero_componente()
+                        tmp.set_contador_posicion(cont_act)
+                    return 1
+
+                elif int(actual.get_numero_componente()) != int(actual.get_contador_posicion()) and int(actual.get_estado()) != 2:
+                    actual.set_estado(1)
+                    nuevo_tiempo = int(actual.get_tiempo_total()) + 1
+                    actual.set_tiempo_total(nuevo_tiempo)
+                    if int(actual.get_numero_componente()) > int(actual.get_contador_posicion()):
+                        cont_act = int(actual.get_contador_posicion()) + 1
+                        actual.set_contador_posicion(cont_act)
+                    elif int(actual.get_numero_componente()) < int(actual.get_contador_posicion()):
+                        cont_act = int(actual.get_contador_posicion()) - 1
+                        actual.set_contador_posicion(cont_act)
+                    return 0
+            actual = actual.siguiente  
+            
     def recorrer_simulacion(self, tokens):
-        global primer_componente
         contador = 0
-        actual = self.inicio_simulacion
-        while actual is not None:
-            while True:
-                nombre_producto = actual.get_nombre_producto()
-                tokens.recorrer_tiempo_elaboracion(nombre_producto)
-                primer_componente = False
-                contador += 1
-                if contador == int(actual.get_cantidad_componentes_elaborar()):
-                    primer_componente = True
-                    contador = 0
-                    break        
-            actual = actual.siguiente
-    
-    def guardar_numero_componentes_producto(self, tokens): #quizas lo elimine, puede no ser necesario
-        actual = self.inicio_producto
-        while actual is not None:
-            nombre = actual.get_nombre()
-            num_componentes = tokens.recorrer_trabajo(nombre)
-            actual.set_cantidad_componentes_elaborar(num_componentes)
-            actual = actual.siguiente
+        while True:
+            actual = self.inicio_simulacion
+            while actual is not None:
+                if int(actual.get_componentes_terminados()) != int(actual.get_cantidad_componentes_elaborar()):
+                    nombre_producto = actual.get_nombre_producto()
+                    TK_cont = tokens.recorrer_tiempo_elaboracion(nombre_producto)
+                    num_terminados = int(actual.get_componentes_terminados()) + TK_cont
+                    actual.set_componentes_terminados(num_terminados)
+                    
+                elif int(actual.get_componentes_terminados()) == int(actual.get_cantidad_componentes_elaborar()) and not actual.get_entro():
+                    actual.set_entro(True)
+                    contador += 1
+                if contador >= actual.get_cantidad_productos_simular():
+                    return  
+                actual = actual.siguiente
     
     def guardar_numero_componentes_simulacion(self, tokens):
         actual = self.inicio_simulacion
