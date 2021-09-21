@@ -1,11 +1,10 @@
 class Producto():
-    def __init__(self, nombre, tiempo_total, estado, indice_elaboracion):
+    def __init__(self, nombre, tiempo_total, estado):
         self.nombre = nombre
         self.tiempo_total = tiempo_total
         self.estado = estado #No hacer nada, moviendose o ensamblando  0 , 1 , 2
-        self.indice_elaboracion = indice_elaboracion
         self.siguiente = None
-        
+        #validar que si puedan venir iguales 
     def get_nombre(self):
         return self.nombre  
     
@@ -14,9 +13,6 @@ class Producto():
     
     def get_estado(self):
         return self.estado    
-       
-    def get_indice_elaboracion(self):
-        return self.indice_elaboracion  
     
     def set_estado(self, estado):
-        self.estado = estado   
+        self.estado = estado      

@@ -66,9 +66,13 @@ class Analizador():
                     self.agregar_token(self.tipos.ESPACIO, indice_elaboracion, nombre_producto)
                     self.estado = 0  
     def tamano(self, lineas):
-        #self.tokens.imprimir_tokens()
         self.tokens.guardar_trabajo()  
         self.tokens.colocar_tiempo(lineas)  
         #self.tokens.imprimir_trabajo() 
         self.tokens.llenar_matriz()
-          
+    
+    def get_tokens(self):
+        return self.tokens
+    
+    def prueba(self):
+        self.tokens.imprimir_trabajo()      

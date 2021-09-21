@@ -63,22 +63,27 @@ class interfaz():
                 for node in root.iter('Producto'):
                     nombre = node.findtext('nombre').replace("\n","").replace("\t","")
                     elaboracion = node.findtext('elaboracion')
-                    self.productos.insertar_producto(nombre, 0, 0, indice_elaboracion)
+                    self.productos.insertar_producto(nombre)
                     self.lexico.analizador_estados(elaboracion, indice_elaboracion, nombre) 
                     indice_elaboracion += 1
         #self.lineas.imprimir_linea()       
         self.lexico.tamano(self.lineas)
-        #self.productos.imprimir_producto()
     
     def analizar_simulacion(self, root):  
         for elem in root:
             if elem.tag == 'Nombre':
-                nombre_simulacion = elem.text
+                nombre_simulacion = elem.text.replace("\n","").replace("\t","")
             if elem.tag == 'ListadoProductos':
                 for node in root.iter('Producto'):
-                    nombre_producto = node.text
+                    nombre_producto = node.text.replace("\n","").replace("\t","").strip()
                     self.simulaciones.insertar_simulacion(nombre_simulacion, nombre_producto)
+        #self.simulaciones.imprimir_simulacion()
+        self.productos.guardar_numero_componentes_producto(self.lexico.get_tokens())
+        self.simulaciones.guardar_numero_componentes_simulacion(self.lexico.get_tokens())
+        self.simulaciones.recorrer_simulacion(self.lexico.get_tokens())
         self.simulaciones.imprimir_simulacion()
+        #self.productos.imprimir_producto()
+        self.lexico.prueba()
                     
     def crear_toolbar(self, ventana, fuente):
         toolbar = Frame(ventana, bg = 'white')         

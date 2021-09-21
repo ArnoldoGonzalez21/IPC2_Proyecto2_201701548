@@ -82,6 +82,15 @@ class MatrizDispersa():
                         else:
                             tmp2 = tmp2.abajo
     
+    def recorrer_matriz_simulacion(self):
+        pivote = self.filas.primero
+        while pivote is not None:
+            pivote_celda : NodoInterno = pivote.acceso
+            while pivote_celda is not None:
+                pivote_celda = pivote_celda.derecha
+                
+            pivote = pivote.siguiente
+    
     def sizep(self):
         pass
         #self.filas.mostrar_encabezados()
