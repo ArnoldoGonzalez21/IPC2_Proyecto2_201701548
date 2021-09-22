@@ -91,13 +91,6 @@ class MatrizDispersa():
                 
             pivote = pivote.siguiente
     
-    def sizep(self):
-        pass
-        #self.filas.mostrar_encabezados()
-        #self.columnas.mostrar_encabezados()
-        #self.filas.grafica_encabezados(False) FUNCIONA
-        #self.columnas.grafica_encabezados(True) FUNCIONA
-    
     def enlazar_nodos(self):
         pivote = self.filas.primero
         contenido_nodos = ''

@@ -15,4 +15,7 @@ class Producto():
         return self.estado    
     
     def set_estado(self, estado):
-        self.estado = estado      
+        self.estado = estado   
+        
+    def set_tiempo_total(self, tiempo_total):
+        self.tiempo_total = tiempo_total

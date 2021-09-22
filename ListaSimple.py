@@ -106,9 +106,61 @@ class ListaSimple():
             tiempo = actual.get_tiempo()
             self.matriz.insert(pos_x, pos_y, tiempo)
             actual = actual.siguiente
-        #self.matriz.sizep() 
-        self.matriz.generarGraphviz(True) 
-        
+        #self.matriz.generarGraphviz(True) 
+    
+    def get_tiempo_total_producto(self, nombre_producto) -> str:
+        actual = self.inicio_producto
+        total = 0
+        while actual is not None:
+            if nombre_producto == actual.get_nombre():
+                total = int(actual.get_tiempo_total())
+            actual = actual.siguiente   
+        return str(total)     
+    
+    def set_tiempo_total_producto(self, nombre_producto, tokens):
+        actual = self.inicio_producto
+        while actual is not None:
+            if nombre_producto == actual.get_nombre():
+                actual.set_tiempo_total(tokens.get_tiempo_total_suma_productos(nombre_producto))
+                print(actual.get_tiempo_total())
+            actual = actual.siguiente
+    
+    def get_tiempo_total_suma_productos(self, nombre_producto) -> int :
+        actual = self.inicio_elaboracion
+        tiempo_total = 0
+        while actual is not None:
+            if nombre_producto == actual.get_nombre_producto():
+                tiempo_total += int(actual.get_tiempo_total())
+            actual = actual.siguiente
+        return tiempo_total   
+     
+    tiempo_total = 0
+    def recorrer_tiempo_elaboracion_combo(self, nombre_producto, tabla, END):
+        self.tiempo_total = 0
+        global primer_componente
+        primer_componente = True
+        actual = self.inicio_elaboracion
+        while actual is not None:
+            tmp = actual.siguiente
+            if nombre_producto == actual.get_nombre_producto():
+                tiempo_tirada = 0
+                tiempo = int(actual.get_tiempo())
+                if primer_componente:
+                    num_comp = int(actual.get_numero_componente())
+                    primer_componente = False
+                    tiempo_tirada = tiempo + num_comp
+                else:    
+                    movimiento = int(actual.get_contador_posicion()) - int(actual.get_numero_componente())
+                    movimiento = abs(movimiento)
+                    tiempo_tirada = tiempo + movimiento
+                if tmp is not None and nombre_producto == tmp.get_nombre_producto():
+                    num_comp = int(actual.get_numero_componente())
+                    tmp.set_contador_posicion(num_comp)
+                self.tiempo_total += tiempo_tirada
+                tabla.insert('',END, text = self.tiempo_total, values=(actual.get_numero_linea(),actual.get_numero_componente()))    
+                actual.set_tiempo_total(tiempo_tirada)
+            actual = actual.siguiente  
+    
     def recorrer_tiempo_elaboracion(self, nombre_producto):
         actual = self.inicio_elaboracion
         while actual is not None:
@@ -171,7 +223,6 @@ class ListaSimple():
                 contador += 1
             actual = actual.siguiente 
         return contador    
-    
         
     def colocar_tiempo(self, lineas):
         actual = self.inicio_elaboracion
@@ -188,7 +239,49 @@ class ListaSimple():
                 return False
             actual = actual.siguiente 
         return True
-       
+    
+    def proceso_elaboracion_label(self, nombre_producto):
+        actual = self.inicio_elaboracion
+        contenido = ''
+        while actual is not None:
+            if nombre_producto == actual.get_nombre_producto():
+                contenido += 'L'+str(actual.get_numero_linea())+ ' - C'+str(actual.get_numero_componente())+'\n'
+            actual = actual.siguiente
+        return contenido
+    
+    def opciones_productos_combo(self, combo):
+        nombres = []
+        values = list(combo["values"])
+        actual = self.inicio_producto
+        while actual is not None:       
+            nombres.append(actual.get_nombre()) 
+            actual = actual.siguiente
+        combo["values"] = values + nombres
+         
+    def set_columnas_tabla_simulacion(self, con_archivo):
+        if con_archivo:
+            numero = 0
+            columns = []
+            actual = self.inicio_simulacion
+            while actual is not None:
+                numero = actual.get_cantidad_productos_simular()
+                actual = actual.siguiente
+            for i in range(numero):
+                nueva_colum = '#'+str(i + 1)
+                columns.insert(len(columns),nueva_colum)
+        print(tuple(columns))        
+        return tuple(columns)
+    
+    def set_heading_tabla_simulacion(self, tabla, con_archivo): #mas o menos funciona
+        if con_archivo:
+            contador = 1
+            actual = self.inicio_simulacion
+            while actual is not None:
+                nombre :str = actual.get_nombre_producto()
+                tabla.heading('#'+str(contador), text = nombre)
+                contador += 1
+                actual = actual.siguiente     
+            
     def imprimir_tokens(self):
         print('----------------------------------')
         actual = self.inicio_token

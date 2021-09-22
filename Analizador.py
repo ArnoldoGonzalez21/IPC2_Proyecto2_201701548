@@ -71,8 +71,12 @@ class Analizador():
         #self.tokens.imprimir_trabajo() 
         self.tokens.llenar_matriz()
     
+    def elaboracion_combo(self, nombre_producto, tabla, END):
+        self.tokens.recorrer_tiempo_elaboracion_combo(nombre_producto, tabla, END)
+        self.tokens.imprimir_trabajo()
+    
     def get_tokens(self):
         return self.tokens
     
-    def prueba(self):
-        self.tokens.imprimir_trabajo()      
+    def text_elaboracion(self, nombre_producto):
+        return self.tokens.proceso_elaboracion_label(nombre_producto)  
