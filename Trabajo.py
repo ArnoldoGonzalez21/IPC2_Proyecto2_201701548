@@ -5,7 +5,7 @@ class Trabajo():
         self.indice_producto = indice_producto
         self.tiempo = tiempo
         self.nombre_producto = nombre_producto
-        self.tiempo_total = tiempo_total #tiempo que tardo en este producto
+        self.tiempo_total = tiempo_total #tiempo que tardo ese producto
         self.contador_posicion = contador_posicion
         self.estado = estado 
         self.siguiente = None

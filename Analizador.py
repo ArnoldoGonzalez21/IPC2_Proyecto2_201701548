@@ -65,18 +65,25 @@ class Analizador():
                 if actual == ' ':
                     self.agregar_token(self.tipos.ESPACIO, indice_elaboracion, nombre_producto)
                     self.estado = 0  
-    def tamano(self, lineas):
+    
+    def metodos_lexico(self, lineas):
         self.tokens.guardar_trabajo()  
         self.tokens.colocar_tiempo(lineas)  
-        #self.tokens.imprimir_trabajo() 
         self.tokens.llenar_matriz()
     
-    def elaboracion_combo(self, nombre_producto, tabla, END):
-        self.tokens.recorrer_tiempo_elaboracion_combo(nombre_producto, tabla, END)
-        self.tokens.imprimir_trabajo()
+    def elaboracion_combo(self, nombre_producto, lineas, tabla, END):
+        self.tokens.recorrer_elaboracion_lineas_combo2(nombre_producto, lineas, tabla, END)
+        #self.tokens.recorrer_tiempo_elaboracion_combo(nombre_producto, tabla, END)
+        #self.tokens.imprimir_trabajo()
+    
+    def tiempo_segundos(self):
+        return self.tokens.get_tiempo_seg()
     
     def get_tokens(self):
         return self.tokens
     
     def text_elaboracion(self, nombre_producto):
         return self.tokens.proceso_elaboracion_label(nombre_producto)  
+    
+    def graphviz_elaboracion(self, nombre_producto, tokens):
+        return self.tokens.generar_graphviz_secuencia(nombre_producto, tokens)

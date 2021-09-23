@@ -34,7 +34,7 @@ class interfaz():
         boton_archivo_maquina = tk.Button(toolbar, text = 'Archivo Máquina', command = lambda: self.leer_archivo(True, combo_productos, ventana), width = 15, height = 1, font = (fuente, 10))
         boton_archivo_simulacion = tk.Button(toolbar, text = 'Archivo Simulación', command = lambda: self.leer_archivo(False, combo_productos, ventana), width = 18, height = 1, font = (fuente, 10))
         boton_reporte = tk.Button(toolbar, text = 'Analizar', command = lambda: self.analizar_producto(ventana, label_proceso_elaboracion, combo_productos), width = 9, height = 1, font = (fuente, 10))
-        boton_ayuda = tk.Button(toolbar, text = 'Reportes', width = 9, height = 1, font = (fuente, 10))
+        boton_ayuda = tk.Button(toolbar, text = 'Reportes', command = lambda: self.crear_reporte(combo_productos), width = 9, height = 1, font = (fuente, 10))
         boton_salir = tk.Button(toolbar, text = 'Salir', command = lambda: exit(), width = 9, height = 1, font = (fuente, 10))
         boton_archivo_maquina.pack(side = LEFT, padx = 2, pady = 2)
         boton_archivo_simulacion.pack(side = LEFT, padx = 2, pady = 2)  
@@ -80,12 +80,16 @@ class interfaz():
             scrollbar.place(x = 935, y = 150, height = 245) 
             self.tabla.configure(yscrollcommand=scrollbar.set)
             
-        self.lexico.elaboracion_combo(nombre_combo, self.tabla, END)
+        self.lexico.elaboracion_combo(nombre_combo, self.lineas, self.tabla, END)
         self.productos.set_tiempo_total_producto(nombre_combo, self.lexico.get_tokens())  
         self.tabla.place(x = 350, y = 150)
-        lbl_tiempo_total= tk.Label(ventana, text = self.productos.get_tiempo_total_producto(nombre_combo)+' segundos', font = ('Courier', 12, BOLD), bg = '#EAEAEA')
-        lbl_tiempo_total.place(x = 850, y = 450)
-        
+        lbl_tiempo_total= tk.Label(ventana, text = str(self.lexico.tiempo_segundos())+' segundos', font = ('Courier', 12, BOLD), bg = '#EAEAEA')
+        lbl_tiempo_total.place(x = 850, y = 450) 
+    
+    def crear_reporte(self, combo_producto):
+        nombre_producto : str = combo_producto.get()
+        nombre_producto.strip()
+        self.lexico.graphviz_elaboracion(nombre_producto, self.lexico.get_tokens())
           
     def analizar_producto(self, ventana, label_proceso_elaboracion, combo_productos):
         nombre_combo : str = combo_productos.get()
@@ -134,7 +138,7 @@ class interfaz():
                     self.productos.insertar_producto(nombre)
                     self.lexico.analizador_estados(elaboracion, indice_elaboracion, nombre) 
                     indice_elaboracion += 1
-        self.lexico.tamano(self.lineas)
+        self.lexico.metodos_lexico(self.lineas)
         self.configuracion_combo(combo_productos)
     
     def analizar_simulacion(self, root, ventana):
