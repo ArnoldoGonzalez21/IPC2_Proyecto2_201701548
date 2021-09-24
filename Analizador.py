@@ -74,7 +74,7 @@ class Analizador():
     def elaboracion_combo(self, nombre_producto, lineas, tabla, END):
         self.tokens.recorrer_elaboracion_lineas_combo2(nombre_producto, lineas, tabla, END)
         #self.tokens.recorrer_tiempo_elaboracion_combo(nombre_producto, tabla, END)
-        #self.tokens.imprimir_trabajo()
+        self.tokens.imprimir_trabajo()
     
     def tiempo_segundos(self):
         return self.tokens.get_tiempo_seg()
@@ -87,3 +87,6 @@ class Analizador():
     
     def graphviz_elaboracion(self, nombre_producto, tokens):
         return self.tokens.generar_graphviz_secuencia(nombre_producto, tokens)
+    
+    def return_datos_salida_solitario(self, nombre_producto):
+        return self.tokens.datos_salida_solitario(nombre_producto)

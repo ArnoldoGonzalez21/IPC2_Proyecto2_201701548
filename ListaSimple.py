@@ -170,6 +170,7 @@ class ListaSimple():
                     tiempo_segundos += movimiento_entre_componentes  
                 lineas.guardar_ultima_posicion_linea(int(actual.get_numero_linea()), int(actual.get_numero_componente()))
                 tiempo_segundos += int(actual.get_tiempo())
+                actual.set_tiempo_total(tiempo_segundos)
                 tabla.insert('',END, text = tiempo_segundos, values=(actual.get_numero_linea(),actual.get_numero_componente()))  
             actual = actual.siguiente
         
@@ -374,6 +375,18 @@ class ListaSimple():
         system('dot -Tpng ' +nombre_producto+'.dot -o '+nombre_producto+'.png')
         system('cd ./'+nombre_producto+'.png')
         startfile(nombre_producto+'.png')
+    
+    def datos_salida_solitario(self, nombre_producto):
+        global tiempo_segundos
+        actual = self.inicio_elaboracion
+        contenido = '\n\t\t\t<TiempoTotal>'+str(tiempo_segundos)+'</TiempoTotal>\n\t\t\t<ElaboracionOptima>'
+        while actual is not None:
+            if actual.get_nombre_producto() == nombre_producto:
+                contenido += '\n\t\t\t\t<Tiempo NoSegundo = "'+str(actual.get_tiempo_total())+'">'
+                contenido += '\n\t\t\t\t\t<LineaEnsamblaje NoLinea = "'+str(actual.get_numero_linea())+'">\n\t\t\t\t\t\tEnsamblando\n\t\t\t\t\t</LineaEnsamblaje>\n\t\t\t\t</Tiempo>'
+            actual = actual.siguiente
+        contenido += '\n\t\t\t</ElaboracionOptima>\n\t\t</Producto>\n\t</ListadoProductos>\n</SalidaSimulacion>'
+        return contenido
             
     def imprimir_tokens(self):
         print('----------------------------------')

@@ -90,6 +90,7 @@ class interfaz():
         nombre_producto : str = combo_producto.get()
         nombre_producto.strip()
         self.lexico.graphviz_elaboracion(nombre_producto, self.lexico.get_tokens())
+        self.escribir_archivo(nombre_producto)
           
     def analizar_producto(self, ventana, label_proceso_elaboracion, combo_productos):
         nombre_combo : str = combo_productos.get()
@@ -101,6 +102,20 @@ class interfaz():
     def configuracion_combo(self, combo_productos):
         self.productos.opciones_productos_combo(combo_productos)
         combo_productos.place(x = 30, y = 85)
+    
+    def escribir_archivo(self, nombre_producto):
+        if nombre_producto != '':
+            inicio_xml = '<SalidaSimulacion>\n'
+            inicio_xml += '\t<Nombre>Maquina</Nombre>\n\t<ListadoProductos>\n'
+            inicio_xml += '\t\t<Producto>\n\t\t\t<Nombre>'+nombre_producto+'</Nombre>'
+            datos_salida_producto = self.lexico.return_datos_salida_solitario(nombre_producto)
+            inicio_xml += datos_salida_producto
+            miArchivo = open(nombre_producto+'.xml','w')
+            miArchivo.write(inicio_xml)
+            miArchivo.close()
+            print('Se generó el archivo correctamente')
+        else:
+            print('Elige el producto a simular')
     
     def leer_archivo(self, estado, combo_productos, ventana):
         try:
