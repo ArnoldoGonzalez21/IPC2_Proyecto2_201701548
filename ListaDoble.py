@@ -7,8 +7,8 @@ class ListaDoble():
         self.final_linea = None
         self.size_linea = 0
      
-    def insertar_linea(self, numero, cantidad_componentes,tiempo_ensamblaje, estado):
-        nueva_linea = Linea(numero, cantidad_componentes, tiempo_ensamblaje, estado, 0)
+    def insertar_linea(self, numero, cantidad_componentes,tiempo_ensamblaje):
+        nueva_linea = Linea(numero, cantidad_componentes, tiempo_ensamblaje, 0, 0)
         self.size_linea += 1
         if self.inicio_linea is None:
             self.inicio_linea = nueva_linea
@@ -20,14 +20,14 @@ class ListaDoble():
             tmp.siguiente = nueva_linea
             nueva_linea.anterior = tmp
             self.final_linea = nueva_linea
-            
-    def imprimir_linea(self):
-        print('----------------------------------')
+    
+    def reinciar_lineas(self):
         actual = self.inicio_linea
         while actual is not None:
-            print('numero',actual.numero, 'tiempo',actual.tiempo_ensamblaje, 'estado', actual.cantidad_mov,'cantidad_componentes',actual.cantidad_componentes)
-            actual = actual.siguiente           
-    
+            actual.set_cantidad_mov(0)
+            actual.set_ultima_posicion(0)
+            actual = actual.siguiente
+         
     def get_tiempo(self, numero_linea):
         actual = self.inicio_linea
         while actual is not None: 
@@ -59,7 +59,6 @@ class ListaDoble():
             if int(actual.numero) == int(numero_linea):
                 suma = int(actual.get_cantidad_mov()) + int(cant_mov)
                 actual.set_cantidad_mov(suma)
-                print(suma, 'suma')
                 return
             actual = actual.siguiente
     
@@ -69,4 +68,12 @@ class ListaDoble():
             if int(actual.numero) == int(numero_linea):
                 cant_mov = actual.get_cantidad_mov()
                 return cant_mov
-            actual = actual.siguiente                                  
+            actual = actual.siguiente   
+         
+    def imprimir_linea(self):
+        print('----------------------------------')
+        actual = self.inicio_linea
+        while actual is not None:
+            print('numero',actual.numero, 'tiempo',actual.tiempo_ensamblaje, 'cant_mov', actual.cantidad_mov,'cantidad_componentes',actual.cantidad_componentes, 'ultima pos', actual.ultima_posicion)
+            actual = actual.siguiente           
+                                           

@@ -1,4 +1,3 @@
-from tkinter import Tk
 from Producto import Producto
 from Token import Token
 from Trabajo import Trabajo
@@ -6,9 +5,6 @@ from Simulacion import Simulacion
 from MatrizDispersa import MatrizDispersa
 from os import system, startfile
 
-primer_componente = True
-termino = False
-tiempo_total_mayor = 0  
 tiempo_segundos = 0
 
 class ListaSimple():
@@ -69,8 +65,8 @@ class ListaSimple():
             nuevo.anterior = tmp
             self.final_elaboracion = nuevo               
     
-    def insertar_simulacion(self, nombre_simulacion, nombre_producto, cantidad_productos_simular):
-        nuevo = Simulacion(nombre_simulacion, nombre_producto, 0, 0, cantidad_productos_simular, False)
+    def insertar_simulacion(self, nombre_simulacion, nombre_producto):
+        nuevo = Simulacion(nombre_simulacion, nombre_producto)
         self.size_simulacion += 1
         if self.inicio_simulacion is None:
             self.inicio_simulacion = nuevo
@@ -89,6 +85,7 @@ class ListaSimple():
         while actual is not None:
             tmp = actual.siguiente
             if tmp is None:
+                self.insertar_elaboracion(numero_linea, numero_componente, 0, indice_elaboracion, nombre_producto)
                 break
             if actual.get_lexema() == 'L':
                 numero_linea = tmp.get_lexema()
@@ -97,9 +94,7 @@ class ListaSimple():
             if actual.get_lexema() == 'C':
                 numero_componente = tmp.get_lexema()
             if actual.get_lexema() == '':   
-                if self.repetidos(numero_linea, numero_componente, indice_elaboracion):
-                    self.insertar_elaboracion(numero_linea, numero_componente, 0, indice_elaboracion, nombre_producto)
-                    #print('L',numero_linea, 'C',numero_componente, indice_elaboracion)
+                self.insertar_elaboracion(numero_linea, numero_componente, 0, indice_elaboracion, nombre_producto)
             actual = actual.siguiente 
 
     def llenar_matriz(self):
@@ -121,13 +116,14 @@ class ListaSimple():
             actual = actual.siguiente   
         return str(total)     
     
-    def set_tiempo_total_producto(self, nombre_producto, tokens):
+    def set_tiempo_total_producto(self, nombre_producto, tiempo_total):
         actual = self.inicio_producto
         while actual is not None:
             if nombre_producto == actual.get_nombre():
-                actual.set_tiempo_total(tokens.get_tiempo_total_suma_productos(nombre_producto))
-                print(actual.get_tiempo_total())
+                actual.set_tiempo_total(tiempo_total)
+                return
             actual = actual.siguiente
+        self.imprimir_producto()    
     
     def get_tiempo_total_suma_productos(self, nombre_producto) -> int :
         actual = self.inicio_elaboracion
@@ -142,16 +138,22 @@ class ListaSimple():
         global tiempo_segundos
         return tiempo_segundos
     
-    def recorrer_elaboracion_lineas_combo2(self, nombre_producto, lineas, tabla, END): #, tabla, END, lineas
+    def recorrer_elaboracion_tabla(self, nombre_producto, lineas, tabla, END, solitario): 
         global tiempo_segundos
         ultimo_componente = 0
         linea_mayor = 0
-        tamano = 0
         movimiento_entre_componentes = 0
+        if solitario:
+            tiempo_segundos = 0
+            lineas.reinciar_lineas()
+            
         actual = self.inicio_elaboracion
         while actual is not None:
+            if solitario:
+                actual.set_contador_posicion(0)
+                actual.set_tiempo_total(0)
+                actual.set_estado(0)
             if actual.get_nombre_producto() == nombre_producto:
-                tamano += 1
                 tmp_mayor = int(actual.get_numero_linea())
                 if tmp_mayor > linea_mayor:
                     linea_mayor = tmp_mayor
@@ -164,107 +166,37 @@ class ListaSimple():
                 if ultimo_componente != 0:
                     movimiento_entre_componentes = int(actual.get_numero_componente()) - int(ultimo_componente)
                     movimiento_entre_componentes = abs(movimiento_entre_componentes)
-                    print('movimiento_entre_componentes',movimiento_entre_componentes) 
                     lineas.guardar_cantidad_mov(int(actual.get_numero_linea()), movimiento_entre_componentes)
-                    #if int(movimiento_entre_componentes) + int(actual.get_numero_componente()) > int(linea_mayor):
                     tiempo_segundos += movimiento_entre_componentes  
                 lineas.guardar_ultima_posicion_linea(int(actual.get_numero_linea()), int(actual.get_numero_componente()))
                 tiempo_segundos += int(actual.get_tiempo())
                 actual.set_tiempo_total(tiempo_segundos)
-                tabla.insert('',END, text = tiempo_segundos, values=(actual.get_numero_linea(),actual.get_numero_componente()))  
+                if solitario:
+                    tabla.insert('',END, text = '\t      '+str(tiempo_segundos), values=(actual.get_numero_linea(),actual.get_numero_componente()))  
+                else:
+                    tabla.insert('',END, text = nombre_producto, values=(tiempo_segundos,actual.get_numero_linea(),actual.get_numero_componente()))  
             actual = actual.siguiente
         
         tiempo_segundos += linea_mayor
-        print(tiempo_segundos, 'tiempo segundos global')                 
-           
-    def recorrer_tiempo_elaboracion_combo(self, nombre_producto, tabla, END): #fila por fila
-        self.tiempo_total = 0
-        global primer_componente
-        primer_componente = True
-        actual = self.inicio_elaboracion
+        print(tiempo_segundos, 'tiempo segundos global')             
+        
+    def recorrer_simulacion(self, tokens, lineas, tabla, END):
+        global tiempo_segundos
+        tiempo_segundos = 0
+        actual = tokens.inicio_elaboracion
+        lineas.reinciar_lineas()
         while actual is not None:
-            tmp = actual.siguiente
-            if nombre_producto == actual.get_nombre_producto():
-                tiempo_tirada = 0
-                tiempo = int(actual.get_tiempo())
-                if primer_componente:
-                    num_comp = int(actual.get_numero_componente())
-                    primer_componente = False
-                    tiempo_tirada = tiempo + num_comp
-                else:    
-                    movimiento = int(actual.get_contador_posicion()) - int(actual.get_numero_componente())
-                    movimiento = abs(movimiento)
-                    tiempo_tirada = tiempo + movimiento
-                if tmp is not None and nombre_producto == tmp.get_nombre_producto() and actual.get_numero_linea() == tmp.get_numero_linea():
-                    num_comp = int(actual.get_numero_componente())
-                    tmp.set_contador_posicion(num_comp)
-                self.tiempo_total += tiempo_tirada
-                tabla.insert('',END, text = self.tiempo_total, values=(actual.get_numero_linea(),actual.get_numero_componente()))    
-                actual.set_tiempo_total(tiempo_tirada)
-            actual = actual.siguiente  
-    
-    def recorrer_tiempo_elaboracion(self, nombre_producto):
-        actual = self.inicio_elaboracion
-        while actual is not None:
-            tmp = actual.siguiente
-            if nombre_producto == actual.get_nombre_producto():
-                if int(actual.get_numero_componente()) == int(actual.get_contador_posicion()) and int(actual.get_estado()) != 2:
-                    
-                    actual.set_estado(2) 
-                    nuevo_tiempo = int(actual.get_tiempo_total()) + int(actual.get_tiempo()) 
-                    actual.set_tiempo_total(nuevo_tiempo)
-                    if tmp is not None and tmp.get_nombre_producto() == nombre_producto:
-                        cont_act = actual.get_numero_componente()
-                        tmp.set_contador_posicion(cont_act)
-                    return 1
-
-                elif int(actual.get_numero_componente()) != int(actual.get_contador_posicion()) and int(actual.get_estado()) != 2:
-                    actual.set_estado(1)
-                    nuevo_tiempo = int(actual.get_tiempo_total()) + 1
-                    actual.set_tiempo_total(nuevo_tiempo)
-                    if int(actual.get_numero_componente()) > int(actual.get_contador_posicion()):
-                        cont_act = int(actual.get_contador_posicion()) + 1
-                        actual.set_contador_posicion(cont_act)
-                    elif int(actual.get_numero_componente()) < int(actual.get_contador_posicion()):
-                        cont_act = int(actual.get_contador_posicion()) - 1
-                        actual.set_contador_posicion(cont_act)
-                    return 0
-            actual = actual.siguiente  
+            actual.set_contador_posicion(0)
+            actual.set_tiempo_total(0)
+            actual.set_estado(0)
+            actual = actual.siguiente
             
-    def recorrer_simulacion(self, tokens):
-        contador = 0
-        while True:
-            actual = self.inicio_simulacion
-            while actual is not None:
-                if int(actual.get_componentes_terminados()) != int(actual.get_cantidad_componentes_elaborar()):
-                    nombre_producto = actual.get_nombre_producto()
-                    TK_cont = tokens.recorrer_tiempo_elaboracion(nombre_producto)
-                    num_terminados = int(actual.get_componentes_terminados()) + TK_cont
-                    actual.set_componentes_terminados(num_terminados)
-                    
-                elif int(actual.get_componentes_terminados()) == int(actual.get_cantidad_componentes_elaborar()) and not actual.get_entro():
-                    actual.set_entro(True)
-                    contador += 1
-                if contador >= actual.get_cantidad_productos_simular():
-                    return  
-                actual = actual.siguiente
-    
-    def guardar_numero_componentes_simulacion(self, tokens):
         actual = self.inicio_simulacion
         while actual is not None:
-            nombre = actual.get_nombre_producto()
-            num_componentes = tokens.recorrer_trabajo(nombre)
-            actual.set_cantidad_componentes_elaborar(num_componentes)
-            actual = actual.siguiente              
-    
-    def recorrer_trabajo(self, nombre_producto):
-        actual = self.inicio_elaboracion
-        contador = 0
-        while actual is not None:
-            if actual.get_nombre_producto() == nombre_producto:
-                contador += 1
-            actual = actual.siguiente 
-        return contador    
+            nombre_producto = actual.get_nombre_producto()
+            tokens.recorrer_elaboracion_tabla(nombre_producto, lineas, tabla, END, False)
+            actual = actual.siguiente
+        return tiempo_segundos       
         
     def colocar_tiempo(self, lineas):
         actual = self.inicio_elaboracion
@@ -274,20 +206,12 @@ class ListaSimple():
             actual.set_tiempo(tiempo_ensamblaje)
             actual = actual.siguiente
     
-    def repetidos(self, numero_linea, numero_componente, indice_elaboracion):
+    def proceso_elaboracion_txt(self, nombre_producto):
         actual = self.inicio_elaboracion
-        while actual is not None:
-            if actual.get_numero_linea() == numero_linea and actual.get_numero_componente() == numero_componente and actual.get_indice_producto() == indice_elaboracion:
-                return False
-            actual = actual.siguiente 
-        return True
-    
-    def proceso_elaboracion_label(self, nombre_producto):
-        actual = self.inicio_elaboracion
-        contenido = ''
+        contenido = '\n'
         while actual is not None:
             if nombre_producto == actual.get_nombre_producto():
-                contenido += 'L'+str(actual.get_numero_linea())+ ' - C'+str(actual.get_numero_componente())+'\n'
+                contenido += '  Línea '+str(actual.get_numero_linea())+ ' - Componente '+str(actual.get_numero_componente())+'\n'
             actual = actual.siguiente
         return contenido
     
@@ -299,30 +223,6 @@ class ListaSimple():
             nombres.append(actual.get_nombre()) 
             actual = actual.siguiente
         combo["values"] = values + nombres
-         
-    def set_columnas_tabla_simulacion(self, con_archivo):
-        if con_archivo:
-            numero = 0
-            columns = []
-            actual = self.inicio_simulacion
-            while actual is not None:
-                numero = actual.get_cantidad_productos_simular()
-                actual = actual.siguiente
-            for i in range(numero):
-                nueva_colum = '#'+str(i + 1)
-                columns.insert(len(columns),nueva_colum)
-        print(tuple(columns))        
-        return tuple(columns)
-    
-    def set_heading_tabla_simulacion(self, tabla, con_archivo): #mas o menos funciona
-        if con_archivo:
-            contador = 1
-            actual = self.inicio_simulacion
-            while actual is not None:
-                nombre :str = actual.get_nombre_producto()
-                tabla.heading('#'+str(contador), text = nombre)
-                contador += 1
-                actual = actual.siguiente     
     
     def nodos_cola_secuencia(self, nombre_producto):
         entro_columna = False
@@ -389,7 +289,7 @@ class ListaSimple():
         return contenido
             
     def imprimir_tokens(self):
-        print('----------------------------------')
+        print('--------------Tokens--------------------')
         actual = self.inicio_token
         while actual is not None:
             print('lexema',actual.get_lexema(), 'tipo',actual.get_tipo(), 'id', actual.get_id(),'indice',actual.get_indice_elaboracion())
@@ -406,14 +306,12 @@ class ListaSimple():
         print('---------Trabajo------------')
         actual = self.inicio_elaboracion
         while actual is not None:
-            print('L',actual.get_numero_linea(), 'C',actual.get_numero_componente(), 'tiempo',actual.get_tiempo(), 'indice',actual.get_indice_producto(), 'nombre',actual.get_nombre_producto(), 'tiempo_total', actual.get_tiempo_total(), 'estado', actual.get_estado())
+            print('L',actual.get_numero_linea(), 'C',actual.get_numero_componente(), 'tiempo',actual.get_tiempo(), 'nombre',actual.get_nombre_producto(), 'tiempo_total', actual.get_tiempo_total(), 'pos',actual.get_contador_posicion(),'estado', actual.get_estado())
             actual = actual.siguiente 
     
     def imprimir_simulacion(self):
         print('---------Simulacion------------')
         actual = self.inicio_simulacion
         while actual is not None:
-            print('nombre simul',actual.get_nombre_simulacion(), 'nombre',actual.get_nombre_producto(), 'cant_pro',actual.get_cantidad_componentes_elaborar())
+            print('nombre simul',actual.get_nombre_simulacion(), 'nombre',actual.get_nombre_producto())
             actual = actual.siguiente 
-    
-       
