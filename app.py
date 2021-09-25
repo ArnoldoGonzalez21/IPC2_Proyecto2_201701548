@@ -1,12 +1,13 @@
+import tkinter
 from ListaDoble import ListaDoble
 from ListaSimple import ListaSimple
 from Analizador import Analizador
 from tkinter.constants import CENTER, END, LEFT, TOP, X
 from tkinter.font import BOLD
 import tkinter as tk
-from tkinter import Frame, ttk, filedialog
+from tkinter import Frame, ttk, filedialog, messagebox
 import xml.etree.ElementTree as ET
-#COLUMNAS DE LA TABLA se agregan 2 extras 
+
 class interfaz():
     lexico = Analizador()
     lineas = ListaDoble() 
@@ -59,8 +60,7 @@ class interfaz():
     def configuracion_tabla(self, ventana, solitario, nombre_combo):        
         self.tabla.delete(*self.tabla.get_children())   
         lbl_tiempo_total = tk.Label(ventana, font = ('Courier', 12, BOLD), bg = '#EAEAEA')
-        if solitario:
-            self.tabla.configure(columns = 0, height = 11)    
+        if solitario:  
             self.tabla.configure(columns = ('#1','#2'), height = 11)
             self.tabla.column('#0',width = 180, anchor = CENTER)
             self.tabla.column('#1',width = 180, anchor = CENTER)
@@ -76,11 +76,11 @@ class interfaz():
             lbl_tiempo_total.place(x = 850, y = 450)
              
         else:
-            self.lineas.imprimir_linea()
             self.tabla.destroy()
             self.tabla = ttk.Treeview(ventana)
-            self.tabla.configure(columns = 0, height = 11)
-            self.txt_proceso_elaboracion.insert(tk.INSERT, '') 
+            self.txt_proceso_elaboracion.configure(state = 'normal')
+            self.txt_proceso_elaboracion.delete('1.0', END)  
+            self.txt_proceso_elaboracion.configure(state = 'disabled')
             self.tabla.configure(columns = ('#1','#2','#3'), height = 11)
             self.tabla.column('#0',width = 180, anchor = CENTER)
             self.tabla.column('#1',width = 180, anchor = CENTER)
@@ -105,7 +105,7 @@ class interfaz():
         nombre_producto : str = combo_producto.get()
         nombre_producto.strip()
         self.lexico.graphviz_elaboracion(nombre_producto, self.lexico.get_tokens())
-        self.escribir_archivo(nombre_producto)
+        self.escribir_archivo(nombre_producto, True)
           
     def analizar_producto(self, ventana, combo_productos):
         nombre_combo : str = combo_productos.get()
@@ -124,7 +124,7 @@ class interfaz():
         boton_cerrar.pack(side = TOP, pady = 2)
         txt_informacion = tk.Text(ventana_ayuda, width = 150, height = 30)
         txt_informacion.insert(tk.INSERT, self.informacion_ayuda())
-        txt_informacion.configure(state='disabled')
+        txt_informacion.configure(state = 'disabled')
         txt_informacion.pack()
         ventana_ayuda.mainloop()
         
@@ -143,19 +143,29 @@ class interfaz():
         '''
         return contenido
              
-    def escribir_archivo(self, nombre_producto):
-        if nombre_producto != '':
-            inicio_xml = '<SalidaSimulacion>\n'
-            inicio_xml += '\t<Nombre>Maquina</Nombre>\n\t<ListadoProductos>\n'
-            inicio_xml += '\t\t<Producto>\n\t\t\t<Nombre>'+nombre_producto+'</Nombre>'
-            datos_salida_producto = self.lexico.return_datos_salida_solitario(nombre_producto)
-            inicio_xml += datos_salida_producto
-            miArchivo = open(nombre_producto+'.xml','w')
-            miArchivo.write(inicio_xml)
-            miArchivo.close()
-            print('Se generó el archivo correctamente')
+    def escribir_archivo(self, nombre_producto, solitario):
+        if solitario:
+            if nombre_producto != '':
+                inicio_xml = '<SalidaSimulacion>\n'
+                inicio_xml += '\t<Nombre>Maquina</Nombre>\n\t<ListadoProductos>\n'
+                inicio_xml += '\t\t<Producto>\n\t\t\t<Nombre>'+nombre_producto+'</Nombre>'
+                datos_salida_producto = self.lexico.return_datos_salida_solitario(nombre_producto)
+                fin_xml = '\n\t</ListadoProductos>\n</SalidaSimulacion>'
+                inicio_xml += datos_salida_producto + fin_xml
+                miArchivo = open(nombre_producto+'.xml','w')
+                miArchivo.write(inicio_xml)
+                miArchivo.close()
+                print('Se generó el archivo correctamente')
+            else:
+                messagebox.showwarning(title = 'Aviso', message = 'Elige el producto a simular')
         else:
-            print('Elige el producto a simular')
+            datos_salida_producto = self.simulaciones.datos_salida_simulacion(self.lexico.get_tokens())
+            fin_xml = '\n\t</ListadoProductos>\n</SalidaSimulacion>'
+            datos_salida_producto += fin_xml
+            miArchivo = open('Salida_Simulacion.xml','w')
+            miArchivo.write(datos_salida_producto)
+            miArchivo.close()
+            print('Se generó el archivo correctamente')       
     
     def leer_archivo(self, estado, combo_productos, ventana):
         try:
@@ -208,6 +218,7 @@ class interfaz():
         self.lexico.imprimir_elaboracion()
         lbl_tiempo_total = tk.Label(ventana, text = str(tiempo_total)+' segundos', font = ('Courier', 12, BOLD), bg = '#EAEAEA')
         lbl_tiempo_total.place(x = 850, y = 450)
+        self.escribir_archivo(nombre_producto, False)
     
 if __name__ == '__main__':
     interfaz()

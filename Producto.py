@@ -2,9 +2,9 @@ class Producto():
     def __init__(self, nombre, tiempo_total, estado):
         self.nombre = nombre
         self.tiempo_total = tiempo_total
-        self.estado = estado #No hacer nada, moviendose o ensamblando  0 , 1 , 2
+        self.estado = estado 
         self.siguiente = None
-        #validar que si puedan venir iguales 
+        
     def get_nombre(self):
         return self.nombre  
     

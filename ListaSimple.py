@@ -276,6 +276,19 @@ class ListaSimple():
         system('cd ./'+nombre_producto+'.png')
         startfile(nombre_producto+'.png')
     
+    def datos_salida_simulacion(self, tokens):
+        titulo = False
+        actual = self.inicio_simulacion
+        contenido = '<SalidaSimulacion>\n'
+        while actual is not None:
+            if not titulo:
+                contenido += '\t<Nombre>'+actual.get_nombre_simulacion()+'</Nombre>\n\t<ListadoProductos>'
+                titulo = True
+            contenido += '\n\t\t<Producto>\n\t\t\t<Nombre>'+actual.get_nombre_producto()+'</Nombre>'
+            contenido += tokens.datos_salida_solitario(actual.get_nombre_producto())
+            actual = actual.siguiente
+        return contenido  
+    
     def datos_salida_solitario(self, nombre_producto):
         global tiempo_segundos
         actual = self.inicio_elaboracion
@@ -285,7 +298,7 @@ class ListaSimple():
                 contenido += '\n\t\t\t\t<Tiempo NoSegundo = "'+str(actual.get_tiempo_total())+'">'
                 contenido += '\n\t\t\t\t\t<LineaEnsamblaje NoLinea = "'+str(actual.get_numero_linea())+'">\n\t\t\t\t\t\tEnsamblando\n\t\t\t\t\t</LineaEnsamblaje>\n\t\t\t\t</Tiempo>'
             actual = actual.siguiente
-        contenido += '\n\t\t\t</ElaboracionOptima>\n\t\t</Producto>\n\t</ListadoProductos>\n</SalidaSimulacion>'
+        contenido += '\n\t\t\t</ElaboracionOptima>\n\t\t</Producto>'
         return contenido
             
     def imprimir_tokens(self):
