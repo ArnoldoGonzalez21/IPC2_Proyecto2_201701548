@@ -105,7 +105,7 @@ class ListaSimple():
             tiempo = actual.get_tiempo()
             self.matriz.insert(pos_x, pos_y, tiempo)
             actual = actual.siguiente
-        #self.matriz.generarGraphviz(True) 
+        self.matriz.generarGraphviz()   
     
     def get_tiempo_total_producto(self, nombre_producto) -> str:
         actual = self.inicio_producto
@@ -228,7 +228,7 @@ class ListaSimple():
         entro_columna = False
         contenido_nodo = ''
         contenido_enlace_nodo = ''
-        contenido_rank = '{rank = same;raiz'
+        contenido_rank = '\t\t{rank = same;raiz'
         tamano = 0
         contador = 1
         actual = self.inicio_elaboracion
@@ -240,12 +240,12 @@ class ListaSimple():
         actual = self.inicio_elaboracion    
         while actual is not None:
             if actual.get_nombre_producto() == nombre_producto:
-                contenido_nodo += 'nodo'+str(contador)+'[label = "L'+actual.get_numero_linea()+'C'+actual.get_numero_componente()+'\", group = '+str(contador + 1)+', fillcolor="#E9FFFC", shape = note];\n'
+                contenido_nodo += '\r\t\tnodo'+str(contador)+'[label = "L'+actual.get_numero_linea()+'C'+actual.get_numero_componente()+'\", group = '+str(contador + 1)+', fillcolor="#E9FFFC", shape = note];\n'
                 if not entro_columna:
-                    contenido_enlace_nodo += 'raiz -> nodo'+str(contador)+';\n'
+                    contenido_enlace_nodo += '\t\traiz -> nodo'+str(contador)+';\n'
                     entro_columna = True
                 if contador + 1 <= tamano: 
-                    contenido_enlace_nodo += 'nodo'+str(contador)+' -> nodo'+str(contador + 1)+';\n'        
+                    contenido_enlace_nodo += '\t\tnodo'+str(contador)+' -> nodo'+str(contador + 1)+';\n'        
                 contenido_rank += '; nodo'+str(contador)  
                 contador += 1  
                              
@@ -256,17 +256,17 @@ class ListaSimple():
     
     def generar_graphviz_secuencia(self, nombre_producto, tokens):
         inicio_graphviz = '''
-        digraph L{
-            node[shape = folder fillcolor="#F8DEA1" style = filled]
-            subgraph cluster_p{
-            label = \"Reporte Cola de Secuencia '''+nombre_producto+''' \"
-            bgcolor = "#398D9C"
-                raiz[label = "INICIO"]
-                edge[dir = "right"]
+        \rdigraph L{
+        \r\tnode[shape = folder fillcolor="#F8DEA1" style = filled]
+        \r\tsubgraph cluster_p{
+        \r\t\tlabel = "Reporte Cola de Secuencia '''+nombre_producto+''' "
+        \r\t\tbgcolor = "#398D9C"
+        \r\t\traiz[label = "INICIO"]
+        \r\t\tedge[dir = "right"]
         '''
         nodos = tokens.nodos_cola_secuencia(nombre_producto)
-        
-        final_graphviz = '}\n}'
+        print('<<<<< Generando Imagen >>>>>>')
+        final_graphviz = '\t}\n}'
         graphviz = inicio_graphviz + nodos + final_graphviz
         nombre_producto = nombre_producto.replace(" ","")
         miArchivo= open(nombre_producto+'.dot','w')
@@ -274,7 +274,7 @@ class ListaSimple():
         miArchivo.close()
         system('dot -Tpng ' +nombre_producto+'.dot -o '+nombre_producto+'.png')
         system('cd ./'+nombre_producto+'.png')
-        startfile(nombre_producto+'.png')
+        #startfile(nombre_producto+'.png')
     
     def datos_salida_simulacion(self, tokens):
         titulo = False
@@ -282,7 +282,7 @@ class ListaSimple():
         contenido = '<SalidaSimulacion>\n'
         while actual is not None:
             if not titulo:
-                contenido += '\t<Nombre>'+actual.get_nombre_simulacion()+'</Nombre>\n\t<ListadoProductos>'
+                contenido += '\t<Nombre>'+actual.get_nombre_simulacion().strip()+'</Nombre>\n\t<ListadoProductos>'
                 titulo = True
             contenido += '\n\t\t<Producto>\n\t\t\t<Nombre>'+actual.get_nombre_producto()+'</Nombre>'
             contenido += tokens.datos_salida_solitario(actual.get_nombre_producto())

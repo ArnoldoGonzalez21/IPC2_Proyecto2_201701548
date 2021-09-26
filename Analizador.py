@@ -74,9 +74,6 @@ class Analizador():
     def elaboracion_combo(self, nombre_producto, lineas, tabla, END):
         self.tokens.recorrer_elaboracion_tabla(nombre_producto, lineas, tabla, END, True)
     
-    def imprimir_elaboracion(self):
-        self.tokens.imprimir_trabajo()
-    
     def tiempo_segundos(self):
         return self.tokens.get_tiempo_seg()
     

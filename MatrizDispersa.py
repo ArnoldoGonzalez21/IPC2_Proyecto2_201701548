@@ -5,14 +5,14 @@ from os import system, startfile
 
 class MatrizDispersa():
     
-    def __init__(self, capa): # def __init__(self, capa): self.capa = capa -----> para que puede ser de mas de una dimension aumenta la capa                          
+    def __init__(self, capa): #capa -----> para que puede ser de mas de una dimension aumenta la capa                          
         self.filas = ListaEncabezado('Fila')
         self.columnas = ListaEncabezado('Columna')
         self.capa = capa
         
     def insert(self, pos_x, pos_y, tiempo):
         nuevo = NodoInterno(pos_x, pos_y, tiempo) 
-        # --- lo prinero sera buscar si ya existen los encabezados en la matriz
+        # --- lo primero sera buscar si ya existen los encabezados en la matriz
         nodo_X = self.filas.get_encabezado(pos_x)
         nodo_Y = self.columnas.get_encabezado(pos_y)
 
@@ -30,7 +30,7 @@ class MatrizDispersa():
         if nodo_X.acceso == None: # -- comprobamos que el nodo_x no esta apuntando hacia ningun nodoInterno
             nodo_X.acceso = nuevo
         else: # -- si esta apuntando, validamos si la posicion de la columna del NUEVO nodoInterno es menor a la posicion de la columna del acceso 
-            if int(nuevo.coordenadaY) < int(nodo_X.acceso.coordenadaY): # F1 --->  NI 1,1     NI 1,3
+            if int(nuevo.coordenadaY) < int(nodo_X.acceso.coordenadaY): 
                 nuevo.derecha = nodo_X.acceso              
                 nodo_X.acceso.izquierda = nuevo
                 nodo_X.acceso = nuevo
@@ -100,12 +100,12 @@ class MatrizDispersa():
         while pivote is not None:
             entro_primera_fila = False
             pivote_celda : NodoInterno = pivote.acceso
-            contenido_enlace_fila += 'F'+str(pivote.id)+' -> '
-            contenido_rank += '{rank=same;F'+str(pivote.id)
+            contenido_enlace_fila += '\t\tF'+str(pivote.id)+' -> '
+            contenido_rank += '\t\t{rank=same;F'+str(pivote.id)
             while pivote_celda is not None:
                 tmp_pivote_celda = pivote_celda.izquierda
                 
-                contenido_nodos += 'nodo'+str(pivote_celda.coordenadaX)+'_'+str(pivote_celda.coordenadaY)
+                contenido_nodos += '\n\t\tnodo'+str(pivote_celda.coordenadaX)+'_'+str(pivote_celda.coordenadaY)
                 contenido_nodos += '[label="'+str(pivote_celda.tiempo)+'",fillcolor = green, group = '+str(int(pivote_celda.coordenadaY) + 1)+']\n'
                 
                 if pivote.id == pivote_celda.coordenadaX:
@@ -115,7 +115,7 @@ class MatrizDispersa():
                         entro_primera_fila = True
                     else:
                         if tmp_pivote_celda is not None:
-                            contenido_enlace_fila += 'nodo'+str(tmp_pivote_celda.coordenadaX)+'_'+str(tmp_pivote_celda.coordenadaY)+' -> ' + 'nodo'+str(pivote_celda.coordenadaX)+'_'+str(pivote_celda.coordenadaY)+';\n'                            
+                            contenido_enlace_fila += '\t\tnodo'+str(tmp_pivote_celda.coordenadaX)+'_'+str(tmp_pivote_celda.coordenadaY)+' -> ' + 'nodo'+str(pivote_celda.coordenadaX)+'_'+str(pivote_celda.coordenadaY)+';\n'                            
 
                 pivote_celda = pivote_celda.derecha
             contenido_rank += '}\n'
@@ -125,7 +125,7 @@ class MatrizDispersa():
         while pivote is not None:
             entro_primera_columna = False
             pivote_celda : NodoInterno = pivote.acceso
-            contenido_enlace_columna += 'C'+str(pivote.id)+' -> '
+            contenido_enlace_columna += '\t\tC'+str(pivote.id)+' -> '
             while pivote_celda is not None:
                 tmp_pivote_celda = pivote_celda.arriba
                  
@@ -135,46 +135,37 @@ class MatrizDispersa():
                         entro_primera_columna = True
                     else:
                         if tmp_pivote_celda is not None:
-                            contenido_enlace_columna += 'nodo'+str(tmp_pivote_celda.coordenadaX)+'_'+str(tmp_pivote_celda.coordenadaY)+' -> ' + 'nodo'+str(pivote_celda.coordenadaX)+'_'+str(pivote_celda.coordenadaY)+';\n'                        
+                            contenido_enlace_columna += '\t\tnodo'+str(tmp_pivote_celda.coordenadaX)+'_'+str(tmp_pivote_celda.coordenadaY)+' -> ' + 'nodo'+str(pivote_celda.coordenadaX)+'_'+str(pivote_celda.coordenadaY)+';\n'                        
 
                 pivote_celda = pivote_celda.abajo
             pivote = pivote.siguiente
         
         contenido_nodos += contenido_enlace_fila + contenido_rank + contenido_enlace_columna
-        print(contenido_nodos)
         return contenido_nodos
     
-    def generarGraphviz(self, termino):
-        nombre_terreno = 'Grafica'
-        #nombre_terreno = terrenos.buscar_nombre_terreno(indice)
+    def generarGraphviz(self):
+        nombre = 'Matriz Dispersa'
         inicio_graphviz = '''
-        digraph L{
-            node[shape = circle fillcolor="white" style = filled]
-            subgraph cluster_p{
-            label = \"'''+nombre_terreno+''' \"
-            bgcolor = "#398D9C"
-                raiz[label = "0,0"]
-                edge[dir = "both"]
+        \rdigraph L{
+        \r\tnode[shape = circle fillcolor="white" style = filled]
+        \r\tsubgraph cluster_p{
+        \r\t\tlabel = \"'''+nombre+''' \"
+        \r\t\tbgcolor = "#398D9C"
+        \r\t\traiz[label = "0,0"]
+        \r\t\tedge[dir = "both"]
     '''
         encabezados = self.filas.grafica_encabezados(False)
         encabezados += self.columnas.grafica_encabezados(True)
         
         nodos = self.enlazar_nodos()
         
-        final_graphviz = '}   }'
+        final_graphviz = '\n\t}\n}'
         graphviz = inicio_graphviz + encabezados + nodos + final_graphviz
+        print('<<<<< Generando imagen >>>>>')
         #print(graphviz)
-        if termino:
-            miArchivo= open('graphviz_matriz.dot','w')
-            miArchivo.write(graphviz)
-            miArchivo.close()
-            system('dot -Tpng graphviz_matriz.dot -o graphviz_matriz.png')
-            system('cd ./graphviz_matriz.png')
-            startfile('graphviz_matriz.png')
-        else:
-            miArchivo= open('graphviz_matriz.dot','w')
-            miArchivo.write(graphviz)
-            miArchivo.close()
-            system('dot -Tpng graphviz_matriz.dot -o graphviz_matriz.png')
-            system('cd ./graphviz_matriz.png')
-            startfile('graphviz_matriz.png')  
+        miArchivo= open('graphviz_matriz.dot','w')
+        miArchivo.write(graphviz)
+        miArchivo.close()
+        system('dot -Tpng graphviz_matriz.dot -o graphviz_matriz.png')
+        system('cd ./graphviz_matriz.png')
+        #startfile('graphviz_matriz.png')

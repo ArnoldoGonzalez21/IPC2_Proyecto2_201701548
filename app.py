@@ -95,7 +95,6 @@ class interfaz():
             self.tabla.configure(yscrollcommand=scrollbary.set)    
         
         self.tabla.place(x = 350, y = 150)
-        self.lexico.imprimir_elaboracion()
     
     def configuracion_combo(self, combo_productos):
         self.productos.opciones_productos_combo(combo_productos)
@@ -215,7 +214,6 @@ class interfaz():
                     self.simulaciones.insertar_simulacion(nombre_simulacion, nombre_producto) 
         self.configuracion_tabla(ventana, False, "")
         tiempo_total = self.simulaciones.recorrer_simulacion(self.lexico.get_tokens(), self.lineas, self.tabla, END)
-        self.lexico.imprimir_elaboracion()
         lbl_tiempo_total = tk.Label(ventana, text = str(tiempo_total)+' segundos', font = ('Courier', 12, BOLD), bg = '#EAEAEA')
         lbl_tiempo_total.place(x = 850, y = 450)
         self.escribir_archivo(nombre_producto, False)

@@ -57,22 +57,22 @@ class ListaEncabezado():
         
         contenido_raiz_c = ''
         if columna_grafica:
-            contenido_rank = '{rank = same;raiz'
+            contenido_rank = '\t\t{rank = same;raiz'
         while actual is not None:
             tmp = actual.siguiente
             if self.tipo == 'Fila':
-                contenido_fila += 'F'+str(actual.id)+'[label="F'+str(actual.id)+'\",group=1,fillcolor=yellow];\n'
+                contenido_fila += '\r\t\tF'+str(actual.id)+'[label="F'+str(actual.id)+'\",group=1,fillcolor=yellow];\n'
                 if tmp is not None:
-                    contenido_fila_enlace += 'F'+str(actual.id)+' -> F'+str(tmp.id)+';\n' 
+                    contenido_fila_enlace += '\r\t\tF'+str(actual.id)+' -> F'+str(tmp.id)+';\n' 
                 if not entro_fila:
-                    contenido_raiz_f += 'raiz -> F'+str(actual.id)+';\n'
+                    contenido_raiz_f += '\r\t\traiz -> F'+str(actual.id)+';\n'
                     entro_fila = True
             elif self.tipo == 'Columna':
-                contenido_columna += 'C'+str(actual.id)+'[label="C'+str(actual.id)+'\",group = '+str(int(actual.id) + 1)+',fillcolor=yellow];\n'
+                contenido_columna += '\r\t\tC'+str(actual.id)+'[label="C'+str(actual.id)+'\",group = '+str(int(actual.id) + 1)+',fillcolor=yellow];\n'
                 if tmp is not None:
-                    contenido_columna_enlace += 'C'+str(actual.id)+' -> C'+str(tmp.id)+';\n'
+                    contenido_columna_enlace += '\r\t\tC'+str(actual.id)+' -> C'+str(tmp.id)+';\n'
                 if not entro_columna:
-                    contenido_raiz_c += 'raiz -> C'+str(actual.id)+';\n'
+                    contenido_raiz_c += '\r\t\traiz -> C'+str(actual.id)+';\n'
                     entro_columna = True
                 contenido_rank += '; C'+str(actual.id)                     
             actual = actual.siguiente
@@ -81,7 +81,6 @@ class ListaEncabezado():
             contenido = contenido_columna + contenido_columna_enlace + contenido_raiz_c + contenido_rank
         else:
             contenido = contenido_fila + contenido_fila_enlace + contenido_raiz_f
-        print(contenido)
         return contenido
     
     def get_encabezado(self, id): #buscar el encabezado
